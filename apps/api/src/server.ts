@@ -1,8 +1,10 @@
 import { buildApp } from './app'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 async function start() {
   const app = await buildApp()
-
   try {
     await app.listen({ port: 3333, host: '0.0.0.0' })
     console.log('Server running on http://localhost:3333')

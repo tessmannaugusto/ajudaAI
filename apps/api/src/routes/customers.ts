@@ -1,16 +1,29 @@
 import { FastifyInstance } from 'fastify'
 
-// cada arquivo de rota é um plugin
 export async function customersRoutes(fastify: FastifyInstance) {
-  fastify.get('/users', async (request, reply) => {
-    const users = [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }]
-    return users
-  })
+  fastify.get('/customers', async (request, reply) => {
+    try {
+      const { rows } = await fastify.pg.query('SELECT * FROM customers');
+      reply.send(rows);
+    } catch (err) {
+      fastify.log.error(err);
+      reply.status(500).send({ error: 'Failed to fetch customers' });
+    }
+  });
 
-  fastify.post('/users', async (request, reply) => {
-    const body = request.body as { name: string }
-    const newUser = { id: Math.random(), name: body.name }
-    reply.code(201)
-    return newUser
-  })
+  fastify.post('/customers', async (request, reply) => {
+    const { name, email, phone, address, city, state } = request.body as { name: string, email: string, phone: string, address: string, city: string, state: string };
+    try {
+      const { rows } = await fastify.pg.query(
+        `INSERT INTO customers(name, email, phone, address, city, state) 
+   VALUES($1, $2, $3, $4, $5, $6) 
+   RETURNING id, name, email`,
+        [name, email, phone, address, city, state]
+      );
+      reply.status(201).send({ id: rows[0].id, name: rows[0].name });
+    } catch (err) {
+      fastify.log.error(err);
+      reply.status(500).send({ error: 'Failed to create customer' });
+    }
+  });
 }
