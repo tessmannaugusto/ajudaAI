@@ -5,13 +5,13 @@ import { generateText, stepCountIs, tool } from 'ai';
 import { FastifyInstance } from 'fastify'
 import z from 'zod';
 
-const getTools = () => {
+const getTools = (fastify: FastifyInstance) => {
   return {
     getCustomers: tool({
       description: 'get the names of customers in database',
       inputSchema: z.object({}),
       execute: async () => ({
-        names: "augusto e tayná"
+        customers: await fastify.customerService.getAll()
       })
     }),
     addCustomer: tool({
@@ -24,8 +24,8 @@ const getTools = () => {
         city: z.string().describe('The city of the customer'),
         state: z.string().describe('The state of the customer'),
       }),
-      execute: async () => {
-        return `the customer name is X and he lives in Y`
+      execute: async (input: any) => {
+        return await fastify.customerService.addCustomer(input)
       }
     })
   }
@@ -37,7 +37,7 @@ export async function aiRoutes(fastify: FastifyInstance) {
     const result = await generateText({
       model: openai('gpt-4o'),
       maxOutputTokens: 512,
-      tools: getTools(),
+      tools: getTools(fastify),
       toolChoice: 'auto',
       stopWhen: stepCountIs(3),
       prompt: `
