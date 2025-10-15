@@ -1,7 +1,7 @@
 import Fastify from 'fastify'
 import fastifyPostgres from 'fastify-postgres';
-import { customersRoutes } from './routes/customers'
-import { aiRoutes } from './routes/ai'
+import { customersRoutes } from './routes/customer.routes'
+import { aiRoutes } from './routes/ai.routes'
 import services from './plugins/services';
 
 export async function buildApp() {

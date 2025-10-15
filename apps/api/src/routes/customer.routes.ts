@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify'
+import customerSchema from '../schemas/customer.schema';
 
 export async function customersRoutes(fastify: FastifyInstance) {
   fastify.get('/customers', async (request, reply) => {
@@ -12,8 +13,9 @@ export async function customersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post('/customers', async (request, reply) => {
-    const { name, email, phone, address, city, state } = request.body as { name: string, email: string, phone: string, address: string, city: string, state: string };
     try {
+      const { name, email, phone, address, city, state } = customerSchema.parse(request.body)
+      console.log({ name, email, phone, address, city, state })
       const { rows } = await fastify.pg.query(
         `INSERT INTO customers(name, email, phone, address, city, state) 
    VALUES($1, $2, $3, $4, $5, $6) 
