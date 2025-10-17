@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.50",
+    "@fastify/cors": "^11.1.0",
     "@fastify/postgres": "^6.0.2",
     "ai": "^5.0.68",
     "dotenv": "^17.2.3",
