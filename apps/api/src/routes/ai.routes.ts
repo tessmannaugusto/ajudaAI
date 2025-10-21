@@ -40,10 +40,10 @@ Pergunta: ${input}
       maxOutputTokens: 512,
       tools: getTools(fastify),
       toolChoice: 'auto',
-      stopWhen: stepCountIs(3),
+      stopWhen: stepCountIs(5),
       system: `Você é um assistente que pode usar ferramentas para buscar informações.
 Responda sempre em linguagem natural e use os resultados das ferramentas para formular a resposta final.`,
-      prompt: `Input do usuario: ${convertToModelMessages(messages)}`,
+      messages: convertToModelMessages(messages),
     });
     return reply.send(result.toUIMessageStreamResponse());
   });
