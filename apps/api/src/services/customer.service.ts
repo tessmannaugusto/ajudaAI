@@ -1,13 +1,19 @@
 import { FastifyInstance } from 'fastify';
+import { sanitizeField } from '../utils/sanitize';
 
 export interface Customer {
-  id: number;
+  id: string;
   name: string;
   address: string;
   email: string;
   phone: string;
   city: string;
   state: string;
+}
+export interface EditCustomerInput {
+  id: string;
+  field: string;
+  value: string;
 }
 
 export class CustomerService {
@@ -21,6 +27,23 @@ export class CustomerService {
     const { rows } = await this.db.query('SELECT * FROM customers');
     return rows;
   }
+
+  async editCustomer(editCustomerInput: EditCustomerInput) {
+  const allowedFields = ['name', 'email', 'phone', 'address', 'city', 'state'];
+  if (!allowedFields.includes(editCustomerInput.field) || !sanitizeField(editCustomerInput.field) || !sanitizeField(editCustomerInput.value)) {
+    throw new Error('Campo inválido');
+  }
+  console.log(JSON.stringify(editCustomerInput))
+  const result = await this.db.query(
+    `UPDATE customers
+     SET ${editCustomerInput.field} = $1
+     WHERE id = $2
+     RETURNING id, name, email, phone, address, city, state`,
+    [editCustomerInput.value, editCustomerInput.id]
+  );
+
+  return result.rows[0];
+}
 
   async addCustomer(customer: Customer): Promise<string> {
     await this.db.query(

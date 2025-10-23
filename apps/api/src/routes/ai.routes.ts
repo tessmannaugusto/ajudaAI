@@ -34,13 +34,12 @@ Pergunta: ${input}
 
   fastify.post('/chat', async function (request, reply) {
     const { messages }: {messages: UIMessage[] } = request.body as any;
-    console.log(JSON.stringify(convertToModelMessages(messages)))
     const result = streamText({
       model: openai('gpt-4o-mini'),
       maxOutputTokens: 512,
       tools: getTools(fastify),
       toolChoice: 'auto',
-      stopWhen: stepCountIs(5),
+      stopWhen: stepCountIs(10),
       system: `Você é um assistente que pode usar ferramentas para buscar informações.
 Responda sempre em linguagem natural e use os resultados das ferramentas para formular a resposta final.`,
       messages: convertToModelMessages(messages),

@@ -5,7 +5,7 @@ import z from "zod"
 const getTools = (fastify: FastifyInstance) => {
   return {
     getCustomers: tool({
-      description: 'get the names of customers in database',
+      description: 'get customers from database',
       inputSchema: z.object({}),
       execute: async () => ({
         customers: await fastify.customerService.getAll()
@@ -23,6 +23,17 @@ const getTools = (fastify: FastifyInstance) => {
       }),
       execute: async (input: any) => {
         return await fastify.customerService.addCustomer(input)
+      }
+    }),
+    editCustomer: tool({
+      description: 'edit an existing customer in the database',
+      inputSchema: z.object({
+        id: z.uuid().describe('The id of the customer in the database'),
+        field: z.string().describe('The name of the field to edit'),
+        value: z.string().describe('The value of the field to edit')
+      }),
+      execute: async (input: any) => {
+        return await fastify.customerService.editCustomer(input)
       }
     })
   }
