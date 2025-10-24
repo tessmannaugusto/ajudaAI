@@ -1,14 +1,50 @@
 import { FastifyInstance } from 'fastify'
-import customerSchema from '../schemas/customer.schema';
+import { customerSchema, getCustomerByIdSchema } from '../schemas/customer.schema';
+
+const PAGE_SIZE = 20
 
 export async function customersRoutes(fastify: FastifyInstance) {
   fastify.get('/customers', async (request, reply) => {
     try {
-      const { rows } = await fastify.pg.query('SELECT * FROM customers');
-      reply.send(rows);
+      const { page } = request.query as { page: string };
+      const pageNumber = Math.max(1, parseInt(page || '1', 10) || 1)
+      const offset = (pageNumber - 1) * PAGE_SIZE;
+      const { rows } = await fastify.pg.query('SELECT * FROM customers LIMIT $1 OFFSET $2', [PAGE_SIZE, offset]);
+      const { rows: countRows } = await fastify.pg.query('SELECT COUNT(*) AS total FROM customers')
+      const totalItems = parseInt(countRows[0].total, 10)
+      const totalPages = Math.ceil(totalItems / PAGE_SIZE)
+      return {
+        data: rows,
+        pagination: {
+          page: pageNumber,
+          pageSize: PAGE_SIZE,
+          totalItems,
+          totalPages
+        }
+      };
     } catch (err) {
       fastify.log.error(err);
       reply.status(500).send({ error: 'Failed to fetch customers' });
+    }
+  });
+
+  fastify.get('/customers/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string }
+      const { rows } = await fastify.pg.query(
+        'SELECT * FROM customers WHERE id = $1',
+        [id]
+      )
+
+      const customer = rows[0]
+      if (!customer) {
+        return reply.status(404).send({ error: 'Customer not found' })
+      }
+
+      return customer
+    } catch (err) {
+      fastify.log.error(err);
+      reply.status(500).send({ error: 'Failed to fetch customer' });
     }
   });
 

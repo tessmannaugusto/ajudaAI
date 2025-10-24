@@ -9,4 +9,8 @@ const customerSchema = z.object({
   state: z.string().min(2, 'State should have exactly 2 chars').max(2, 'State should have exactly 2 chars').describe('The state of the customer'),
 }).strict()
 
-export default customerSchema
+const getCustomerByIdSchema = z.object({
+  id: z.uuid().describe('The id of the customer'),
+}).strict()
+
+export { customerSchema, getCustomerByIdSchema }
