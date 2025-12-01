@@ -35,6 +35,13 @@ const getTools = (fastify: FastifyInstance) => {
       execute: async (input: any) => {
         return await fastify.customerService.editCustomer(input)
       }
+    }),
+    searchKnowledgeBase: tool({
+      description: `get information from your knowledge base about augusto to answer questions.`,
+      inputSchema: z.object({
+        question: z.string().describe('the users question'),
+      }),
+      execute: async ({ question }) => fastify.documentService.searchSimilarDocuments(question, 5, 0.5),
     })
   }
 }

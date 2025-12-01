@@ -4,7 +4,7 @@ import { openai } from '@ai-sdk/openai';
 import { convertToModelMessages, generateText, stepCountIs, streamText, UIMessage } from 'ai';
 import { FastifyInstance } from 'fastify'
 import getTools from '../utils/tools';
-import aiSchema from '../schemas/ai.schema';
+import aiSchema from '../db/schemas/ai.schema';
 
 export async function aiRoutes(fastify: FastifyInstance) {
   fastify.post('/ask', async function (request, reply) {
@@ -41,8 +41,15 @@ Pergunta: ${input}
       toolChoice: 'auto',
       stopWhen: stepCountIs(10),
       system: `Você é um assistente que pode usar ferramentas para buscar informações.
-Responda sempre em linguagem natural e use os resultados das ferramentas para formular a resposta final.`,
+Responda sempre em linguagem natural e use os resultados das ferramentas para formular a resposta final.
+Se você não encontrar as repostas nas tools, use a tool searchKnowledgeBase para tentar encontrar.`,
       messages: convertToModelMessages(messages),
+      onStepFinish: ({ toolCalls, toolResults, finishReason, usage }) => {
+      console.log('--- Step Finished ---');
+      console.log('Tool Calls:', JSON.stringify(toolCalls, null, 2));
+      console.log('Tool Results:', JSON.stringify(toolResults, null, 2));
+      console.log('Finish Reason:', finishReason);
+    }
     });
     return reply.send(result.toUIMessageStreamResponse());
   });

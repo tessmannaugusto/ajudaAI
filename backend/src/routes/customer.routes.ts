@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { customerSchema, getCustomerByIdSchema } from '../schemas/customer.schema';
+import { customerSchema, getCustomerByIdSchema } from '../db/schemas/customer.schema';
 
 const PAGE_SIZE = 20
 
